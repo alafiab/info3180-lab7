@@ -17,8 +17,9 @@ from werkzeug.utils import secure_filename
 
 @app.route('/')
 def index():
+    form=UploadForm()
     """Render website's initial page and let VueJS take over."""
-    return render_template('index.html')
+    return render_template('index.html',form=form)
 
 
 # Here we define a function to collect form errors from Flask-WTF
@@ -52,14 +53,13 @@ def send_text_file(file_name):
 def upload():
     form=UploadForm()
     if request.method == 'POST' and form.validate_on_submit():
-        description = form.description.data 
-        photo = form.photo.data
+        description = request.form['description'] 
+        photo = request.files['photo'] 
         filename = secure_filename(photo.filename)
         photo.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-
-        return jsonify({"message": "File upload successful", "file":photo,"description":description},form=form)
+        return jsonify({'message': 'File upload successful', 'file': photo, 'description': description})
     else:
-        return jsonify({"errors":form_errors(form)})
+        return jsonify({'errors':form_errors(form)})
 
 
 @app.after_request
